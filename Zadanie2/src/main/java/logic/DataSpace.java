@@ -22,13 +22,16 @@ public class DataSpace {
     String method;
 
     public void kMeanProcess(int numberOfIterations) throws IOException {
-        for(int i = 0; i < numberOfIterations; i++) {
+        for (int i = 0; i < numberOfIterations; i++) {
             setAffiliations();
             choseNewCentroids();
             assignElementsToGroups();
             FileWrite fw = new FileWrite();
-            if(i % 100 == 0) {
+            if (i % 100 == 0) {
                 fw.writeGroups(this, "out" + i + ".csv");
+            }
+            if (i < 100) {
+                System.out.println(countErrors());
             }
         }
     }
@@ -138,12 +141,12 @@ public class DataSpace {
      */
     public void assignElementsToGroups() {
         List<Group> groups = new ArrayList<>();
-        for(Centroid c : centroids) {
+        for (Centroid c : centroids) {
             Group group = new Group();
             group.setCentroid(c);
             List<DataPoint> dataPoints = new ArrayList<>();
-            for(DataPoint dp : dataPoints) {
-                if(dp.getCentroid().equals(c)) {
+            for (DataPoint dp : dataPoints) {
+                if (dp.getCentroid().equals(c)) {
                     dataPoints.add(dp);
                 }
             }
@@ -151,6 +154,18 @@ public class DataSpace {
             groups.add(group);
         }
         this.setGroups(groups);
+    }
+
+    public double countErrors() {
+        double sumDist = 0.0;
+        int count = 0;
+        for (Centroid c : this.getCentroids()) {
+            for (DataPoint dp : c.getPoints()) {
+                sumDist += pointToCentroidDistance(dp, c);
+                count++;
+            }
+        }
+        return sumDist / count;
     }
 
     public List<Centroid> getCentroids() {

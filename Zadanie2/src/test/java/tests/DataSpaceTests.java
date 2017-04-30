@@ -43,8 +43,8 @@ public class DataSpaceTests {
 
     @Test
     public void dataSpaceTest() throws IOException {
-        DataSpace dataSpace =  new DataSpace("attract.txt", 6);
-        dataSpace.kMeanProcess(1000);
+        DataSpace dataSpace =  new DataSpace("attract.txt", 100);
+        dataSpace.kMeanProcess(20);
     }
 
     @Test
