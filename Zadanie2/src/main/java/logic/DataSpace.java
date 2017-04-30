@@ -4,7 +4,6 @@ import fileUtils.FileRead;
 import fileUtils.FileWrite;
 import model.Centroid;
 import model.DataPoint;
-import model.Group;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,23 +16,53 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DataSpace {
     private List<Centroid> centroids;
     private List<DataPoint> dataPoints;
-    private List<Group> groups;
     private int numberOfCentroids;
     String method;
 
     public void kMeanProcess(int numberOfIterations) throws IOException {
+        List<Double> quantError = new ArrayList<>();
+
+        FileWrite fw = new FileWrite();
+        fw.writeGroups(this, "Xout1.csv");
+        fw.writeStats(this, "Xstat1.txt");
+
         for (int i = 0; i < numberOfIterations; i++) {
-            setAffiliations();
             choseNewCentroids();
-            assignElementsToGroups();
-            FileWrite fw = new FileWrite();
-            if (i % 100 == 0) {
-                fw.writeGroups(this, "out" + i + ".csv");
-            }
-            if (i < 100) {
-                System.out.println(countErrors());
-            }
+            setAffiliations();
+
+            quantError.add(countQuantization());
         }
+
+        fw.writeGroups(this, "Xout2.csv");
+        fw.writeStats(this, "Xstat2.txt");
+        fw.writeQuantErrors(quantError, "XqErrors2.txt");
+        System.out.println("Wykonano " + numberOfIterations + " iteracji");
+    }
+
+    public void kMeanProcess() throws IOException {
+        List<Double> quantError = new ArrayList<>();
+        double currentCountQuant = 1;
+        double previouseCountQuant = 0;
+        int counter = 0;
+
+        FileWrite fw = new FileWrite();
+        fw.writeGroups(this, "Xout1.csv");
+        fw.writeStats(this, "Xstat1.txt");
+
+        while (Math.abs(currentCountQuant - previouseCountQuant) > 0) {
+            choseNewCentroids();
+            setAffiliations();
+
+            previouseCountQuant = currentCountQuant;
+            currentCountQuant = countQuantization();
+            quantError.add(currentCountQuant);
+
+            counter++;
+        }
+        fw.writeGroups(this, "Xout2.csv");
+        fw.writeStats(this, "Xstat2.txt");
+        fw.writeQuantErrors(quantError, "XqErrors2.txt");
+        System.out.println("Wykonano " + counter + " iteracji");
     }
 
     public DataSpace() {
@@ -45,6 +74,19 @@ public class DataSpace {
         this.dataPoints = fileRead.readFromFile(fileName);
         this.centroids = setRandomCentroids(dataPoints, numberOfCentroids);
         this.numberOfCentroids = numberOfCentroids;
+        setAffiliations();
+    }
+
+    /**
+     * Uzywajac tego konstruktora trzeba pamietac o ustawieniu centroidow poczatkowych
+     * @param fileName
+     */
+    public DataSpace(String fileName, List<Centroid> centroids) {
+        FileRead fileRead = new FileRead();
+        this.dataPoints = fileRead.readFromFile(fileName);
+        this.setCentroids(centroids);
+        this.numberOfCentroids = numberOfCentroids;
+        setAffiliations();
     }
 
     /**
@@ -123,13 +165,12 @@ public class DataSpace {
         for (Centroid c : centroids) {
             double sumX = 0.0, sumY = 0.0;
             int countXs = 0, countYs = 0;
-            for (DataPoint dp : dataPoints) {
-                if (dp.getCentroid().equals(c)) {
+
+            for (DataPoint dp : c.getPoints()) {
                     sumX += dp.getX();
                     sumY += dp.getY();
                     countXs++;
                     countYs++;
-                }
             }
             c.setX(sumX / countXs);
             c.setY(sumY / countYs);
@@ -139,24 +180,23 @@ public class DataSpace {
     /**
      * Przypisuje centroidy i punkty do grup. Taki podzial umozliwi latwiejsze zapisywanie danych do pliku
      */
-    public void assignElementsToGroups() {
-        List<Group> groups = new ArrayList<>();
-        for (Centroid c : centroids) {
-            Group group = new Group();
-            group.setCentroid(c);
-            List<DataPoint> dataPoints = new ArrayList<>();
-            for (DataPoint dp : dataPoints) {
-                if (dp.getCentroid().equals(c)) {
-                    dataPoints.add(dp);
-                }
-            }
-            group.setDataPoints(dataPoints);
-            groups.add(group);
-        }
-        this.setGroups(groups);
-    }
-
-    public double countErrors() {
+//    public void assignElementsToGroups() {
+//        List<Group> groups = new ArrayList<>();
+//        for (Centroid c : centroids) {
+//            Group group = new Group();
+//            group.setCentroid(c);
+//            List<DataPoint> dataPoints = new ArrayList<>();
+//            for (DataPoint dp : dataPoints) {
+//                if (dp.getCentroid().equals(c)) {
+//                    dataPoints.add(dp);
+//                }
+//            }
+//            group.setDataPoints(dataPoints);
+//            groups.add(group);
+//        }
+//        this.setGroups(groups);
+//    }
+    public double countQuantization() {
         double sumDist = 0.0;
         int count = 0;
         for (Centroid c : this.getCentroids()) {
@@ -174,6 +214,7 @@ public class DataSpace {
 
     public void setCentroids(List<Centroid> centroids) {
         this.centroids = centroids;
+        this.setNumberOfCentroids(centroids.size());
     }
 
     public List<DataPoint> getDataPoints() {
@@ -182,14 +223,6 @@ public class DataSpace {
 
     public void setDataPoints(List<DataPoint> dataPoints) {
         this.dataPoints = dataPoints;
-    }
-
-    public List<Group> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(List<Group> groups) {
-        this.groups = groups;
     }
 
     public int getNumberOfCentroids() {

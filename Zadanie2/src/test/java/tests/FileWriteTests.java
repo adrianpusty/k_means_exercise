@@ -3,6 +3,7 @@ package tests;
 import fileUtils.FileRead;
 import fileUtils.FileWrite;
 import logic.DataSpace;
+import model.Centroid;
 import model.DataPoint;
 import org.junit.Test;
 
@@ -35,6 +36,21 @@ public class FileWriteTests {
             bw.write(ds.getDataPoints().get(i).getX() + fw.getCommas(group) + ds.getDataPoints().get(i).getY());
             bw.newLine();
         }
+    }
+
+    @Test
+    public void generateData() throws IOException {
+        File fout = new File("train.txt");
+        FileOutputStream fos = new FileOutputStream(fout);
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+
+        for(int i = 1; i < 9; i++) {
+            for(int j = 1; j < 9; j++) {
+                bw.write(i + "," + j);
+                bw.newLine();
+            }
+        }
+        bw.close();
     }
 }
 
