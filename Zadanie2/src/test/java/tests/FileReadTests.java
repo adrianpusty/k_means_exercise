@@ -5,7 +5,7 @@
  */
 package tests;
 
-import fileUtils.FileReader;
+import fileUtils.FileRead;
 
 import java.util.List;
 
@@ -15,10 +15,10 @@ import org.junit.Test;
 /**
  * @author Adrian
  */
-public class FileOperationsTests {
+public class FileReadTests {
     @Test
     public void testFileReader() {
-        FileReader fr = new FileReader();
+        FileRead fr = new FileRead();
         List<DataPoint> dataPoints = fr.readFromFile("shortened.txt");
         for(DataPoint dataPoint : dataPoints) {
             System.out.println(dataPoint.getX() + " " + dataPoint.getY());

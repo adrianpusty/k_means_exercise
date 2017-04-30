@@ -8,7 +8,26 @@ import java.util.List;
 public class Centroid {
     private double x;
     private double y;
-    private List<List<DataPoint>> points;
+    private List<DataPoint> points;
+
+    public Centroid() {
+
+    }
+
+    public Centroid(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public boolean equals(Centroid other) {
+        if ((this.getX() - other.getX()) > 0.0000000001) {
+            return false;
+        }
+        if ((this.getY() - other.getY()) > 0.0000000001) {
+            return false;
+        }
+        return true;
+    }
 
     public DataPoint toDataPoint() {
         DataPoint dp = new DataPoint();
@@ -33,11 +52,11 @@ public class Centroid {
         this.y = y;
     }
 
-    public List<List<DataPoint>> getPoints() {
+    public List<DataPoint> getPoints() {
         return points;
     }
 
-    public void setPoints(List<List<DataPoint>> points) {
+    public void setPoints(List<DataPoint> points) {
         this.points = points;
     }
 }

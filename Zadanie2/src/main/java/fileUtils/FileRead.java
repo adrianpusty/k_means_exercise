@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * @author Adrian
  */
-public class FileReader {
+public class FileRead {
 
     /**
      * Wczytuje wspolrzedne z pliku i kazda pare x i y zapisuje w postaci obiektu klasy DataPoint
