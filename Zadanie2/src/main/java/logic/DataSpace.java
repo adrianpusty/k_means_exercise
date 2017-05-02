@@ -30,11 +30,15 @@ public class DataSpace {
         List<Double> quantError = new ArrayList<>();
 
         FileWrite fw = new FileWrite();
-        fw.writeGroups(this, "Xout1" + this.method + ".csv");
-        fw.writeStats(this, "Xstat1" + this.method + ".txt");
 
         for (int i = 0; i < numberOfIterations; i++) {
             choseNewCentroids();
+            
+            if (i == 0) {
+                fw.writeGroups(this, "Xout1" + this.method + ".csv");
+                fw.writeStats(this, "Xstat1" + this.method + ".txt");
+            }
+            
             setAffiliations();
 
             quantError.add(countQuantization());
@@ -60,11 +64,15 @@ public class DataSpace {
         int counter = 0;
 
         FileWrite fw = new FileWrite();
-        fw.writeGroups(this, "Xout1" + this.method + ".csv");
-        fw.writeStats(this, "Xstat1" + this.method + ".txt");
 
         while (Math.abs(currentCountQuant - previouseCountQuant) > 0) {
             choseNewCentroids();
+            
+            if (counter == 0) {
+                fw.writeGroups(this, "Xout1" + this.method + ".csv");
+                fw.writeStats(this, "Xstat1" + this.method + ".txt");
+            }
+            
             setAffiliations();
 
             previouseCountQuant = currentCountQuant;
@@ -84,7 +92,7 @@ public class DataSpace {
     }
 
     /**
-     * Konstruktor do FORGY
+     * Konstruktor uwzgledniajacy wybor Forgy badz Random Partition
      *
      * @param fileName
      * @param numberOfCentroids
@@ -102,12 +110,8 @@ public class DataSpace {
         }
     }
 
-//    public DataSpace(String fileName, int numberOfCentroids) {
-//        
-//    }
     /**
-     * KONSTRUKTOR DO CELOW TESTOWYCH Uzywajac tego konstruktora trzeba pamietac
-     * o ustawieniu centroidow poczatkowych
+     * KONSTRUKTOR DO CELOW TESTOWYCH.
      *
      * @param fileName
      */
@@ -137,6 +141,12 @@ public class DataSpace {
         return initialCentroids;
     }
 
+    /**
+     * Tworzy okreslona liczbe centroidow i kazdy punkt ze zbioru punktow
+     * przydziela losowo do jednego z centroidow
+     *
+     * @param numberOfCentroids
+     */
     public void randomPartition(int numberOfCentroids) {
         this.centroids = new ArrayList<>();
         for (int i = 0; i < numberOfCentroids; i++) {
@@ -244,6 +254,12 @@ public class DataSpace {
 //        }
 //        this.setGroups(groups);
 //    }
+    /**
+     * Dla wszystkich centroidow i nalezacych do nich punktow oblicza odleglosc
+     * punktow od centroidu i oblicza srednia.
+     *
+     * @return
+     */
     public double countQuantization() {
         double sumDist = 0.0;
         int count = 0;
@@ -288,6 +304,5 @@ public class DataSpace {
     public void setMethod(String method) {
         this.method = method;
     }
-    
-    
+
 }
