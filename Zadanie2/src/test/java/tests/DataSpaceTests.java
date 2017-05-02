@@ -22,7 +22,7 @@ public class DataSpaceTests {
         DataSpace dataSpace = new DataSpace();
         FileRead fileRead = new FileRead();
         List<DataPoint> data = fileRead.readFromFile("attract.txt");
-        List<Centroid> centroids = dataSpace.setRandomCentroids(data, 5);
+        List<Centroid> centroids = dataSpace.forgyRandomCentroids(data, 5);
         for (Centroid centroid : centroids) {
             System.out.print(centroid.getX() + " ");
             System.out.print(centroid.getY() + " ");
@@ -45,7 +45,7 @@ public class DataSpaceTests {
 
     @Test
     public void testDataSpace() throws IOException {
-        DataSpace dataSpace = new DataSpace("attract.txt", 6);
+        DataSpace dataSpace = new DataSpace("attract.txt", 6, "RP");
         dataSpace.kMeanProcess();
     }
 
@@ -89,7 +89,7 @@ public class DataSpaceTests {
 
     @Test
     public void dataSpaceRandomCentroidsTest() throws IOException {
-        DataSpace dataSpace = new DataSpace("train.txt", 16);
+        DataSpace dataSpace = new DataSpace("train.txt", 16, "RP");
         dataSpace.kMeanProcess(1000);
     }
 

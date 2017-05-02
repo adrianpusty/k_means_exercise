@@ -24,7 +24,7 @@ public class FileWriteTests {
     @Test
     public void getCommasTest2() throws IOException {
         FileWrite fw = new FileWrite();
-        DataSpace ds = new DataSpace("attract.txt", 5);
+        DataSpace ds = new DataSpace("attract.txt", 5, "RP");
 
         File fout = new File("podzialNaGrupy.txt");
         FileOutputStream fos = new FileOutputStream(fout);

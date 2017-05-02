@@ -14,17 +14,24 @@ import java.util.concurrent.ThreadLocalRandom;
  * Created by Adrian on 2017-04-29.
  */
 public class DataSpace {
+
     private List<Centroid> centroids;
     private List<DataPoint> dataPoints;
     private int numberOfCentroids;
-    String method;
+    private String method;
 
+    /**
+     * Kolejne kroki obliczeniowe dla zadanej ilosci iteracji
+     *
+     * @param numberOfIterations
+     * @throws IOException
+     */
     public void kMeanProcess(int numberOfIterations) throws IOException {
         List<Double> quantError = new ArrayList<>();
 
         FileWrite fw = new FileWrite();
-        fw.writeGroups(this, "Xout1.csv");
-        fw.writeStats(this, "Xstat1.txt");
+        fw.writeGroups(this, "Xout1" + this.method + ".csv");
+        fw.writeStats(this, "Xstat1" + this.method + ".txt");
 
         for (int i = 0; i < numberOfIterations; i++) {
             choseNewCentroids();
@@ -33,12 +40,19 @@ public class DataSpace {
             quantError.add(countQuantization());
         }
 
-        fw.writeGroups(this, "Xout2.csv");
-        fw.writeStats(this, "Xstat2.txt");
-        fw.writeQuantErrors(quantError, "XqErrors2.txt");
+        fw.writeGroups(this, "Xout2" + this.method + ".csv");
+        fw.writeStats(this, "Xstat2" + this.method + ".txt");
+        fw.writeQuantErrors(quantError, "XqErrors2" + this.method + ".txt");
         System.out.println("Wykonano " + numberOfIterations + " iteracji");
     }
 
+    /**
+     * Kolejne kroki obliczeniowe do osiagniecia zadanej dokladnosci (Jesli
+     * miedzy dwoma kolejnymi iteracjami blad kwantyzacji nie zmieni sie to
+     * przerywamy petle)
+     *
+     * @throws IOException
+     */
     public void kMeanProcess() throws IOException {
         List<Double> quantError = new ArrayList<>();
         double currentCountQuant = 1;
@@ -46,8 +60,8 @@ public class DataSpace {
         int counter = 0;
 
         FileWrite fw = new FileWrite();
-        fw.writeGroups(this, "Xout1.csv");
-        fw.writeStats(this, "Xstat1.txt");
+        fw.writeGroups(this, "Xout1" + this.method + ".csv");
+        fw.writeStats(this, "Xstat1" + this.method + ".txt");
 
         while (Math.abs(currentCountQuant - previouseCountQuant) > 0) {
             choseNewCentroids();
@@ -59,9 +73,9 @@ public class DataSpace {
 
             counter++;
         }
-        fw.writeGroups(this, "Xout2.csv");
-        fw.writeStats(this, "Xstat2.txt");
-        fw.writeQuantErrors(quantError, "XqErrors2.txt");
+        fw.writeGroups(this, "Xout2" + this.method + ".csv");
+        fw.writeStats(this, "Xstat2" + this.method + ".txt");
+        fw.writeQuantErrors(quantError, "XqErrors2" + this.method + ".txt");
         System.out.println("Wykonano " + counter + " iteracji");
     }
 
@@ -69,16 +83,32 @@ public class DataSpace {
 
     }
 
-    public DataSpace(String fileName, int numberOfCentroids) {
+    /**
+     * Konstruktor do FORGY
+     *
+     * @param fileName
+     * @param numberOfCentroids
+     */
+    public DataSpace(String fileName, int numberOfCentroids, String method) {
         FileRead fileRead = new FileRead();
         this.dataPoints = fileRead.readFromFile(fileName);
-        this.centroids = setRandomCentroids(dataPoints, numberOfCentroids);
         this.numberOfCentroids = numberOfCentroids;
-        setAffiliations();
+        this.method = method;
+        if (method == "F") {
+            this.centroids = forgyRandomCentroids(dataPoints, numberOfCentroids);
+            setAffiliations();
+        } else if (method == "RP") {
+            randomPartition(numberOfCentroids);
+        }
     }
 
+//    public DataSpace(String fileName, int numberOfCentroids) {
+//        
+//    }
     /**
-     * Uzywajac tego konstruktora trzeba pamietac o ustawieniu centroidow poczatkowych
+     * KONSTRUKTOR DO CELOW TESTOWYCH Uzywajac tego konstruktora trzeba pamietac
+     * o ustawieniu centroidow poczatkowych
+     *
      * @param fileName
      */
     public DataSpace(String fileName, List<Centroid> centroids) {
@@ -90,13 +120,15 @@ public class DataSpace {
     }
 
     /**
-     * Z zadanego zbioru punktow wybiera losowo centroidy (ich liczba okreslona przez parametr numberOfCentroids)
+     * Z zadanego zbioru punktow wybiera losowo centroidy (ich liczba okreslona
+     * przez parametr numberOfCentroids) Uzywana na poczatku dzialania algorytmu
+     * w celu ustalenia poczatkowych centroidow
      *
      * @param dataPoints
      * @param numberOfCentroids
      * @return
      */
-    public List<Centroid> setRandomCentroids(List<DataPoint> dataPoints, int numberOfCentroids) {
+    public List<Centroid> forgyRandomCentroids(List<DataPoint> dataPoints, int numberOfCentroids) {
         List<Centroid> initialCentroids = new ArrayList<Centroid>();
         for (int i = 0; i < numberOfCentroids; i++) {
             int randomRow = ThreadLocalRandom.current().nextInt(0, dataPoints.size());
@@ -105,8 +137,22 @@ public class DataSpace {
         return initialCentroids;
     }
 
+    public void randomPartition(int numberOfCentroids) {
+        this.centroids = new ArrayList<>();
+        for (int i = 0; i < numberOfCentroids; i++) {
+            Centroid centroid = new Centroid();
+            centroid.setPoints(new ArrayList<>());
+            this.centroids.add(centroid);
+        }
+        for (DataPoint dp : this.dataPoints) {
+            int randomRow = ThreadLocalRandom.current().nextInt(0, (numberOfCentroids - 1));
+            this.centroids.get(randomRow).getPoints().add(dp);
+        }
+    }
+
     /**
-     * Oblicza odleglosc miedzy danym punktem w przestrzeni dwuwymiarowej a jednym z centroidow
+     * Oblicza odleglosc miedzy danym punktem w przestrzeni dwuwymiarowej a
+     * jednym z centroidow
      *
      * @param specificPoint
      * @param specificCentroid
@@ -142,8 +188,9 @@ public class DataSpace {
     }
 
     /**
-     * Dla kazdego punktu wybiera najmniejsza odleglosc i ustawia centroid odpowiadajacy tej odleglosci
-     * Dla kazdego centroidu przypisuje punkt mial najblizej do tego centroidu
+     * Dla kazdego punktu wybiera najmniejsza odleglosc i ustawia centroid
+     * odpowiadajacy tej odleglosci Dla kazdego centroidu przypisuje punkt mial
+     * najblizej do tego centroidu
      */
     public void setAffiliations() {
         calculateDistanceToCentroids();
@@ -167,10 +214,10 @@ public class DataSpace {
             int countXs = 0, countYs = 0;
 
             for (DataPoint dp : c.getPoints()) {
-                    sumX += dp.getX();
-                    sumY += dp.getY();
-                    countXs++;
-                    countYs++;
+                sumX += dp.getX();
+                sumY += dp.getY();
+                countXs++;
+                countYs++;
             }
             c.setX(sumX / countXs);
             c.setY(sumY / countYs);
@@ -178,7 +225,8 @@ public class DataSpace {
     }
 
     /**
-     * Przypisuje centroidy i punkty do grup. Taki podzial umozliwi latwiejsze zapisywanie danych do pliku
+     * Przypisuje centroidy i punkty do grup. Taki podzial umozliwi latwiejsze
+     * zapisywanie danych do pliku
      */
 //    public void assignElementsToGroups() {
 //        List<Group> groups = new ArrayList<>();
@@ -232,4 +280,14 @@ public class DataSpace {
     public void setNumberOfCentroids(int numberOfCentroids) {
         this.numberOfCentroids = numberOfCentroids;
     }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+    
+    
 }
