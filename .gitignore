@@ -7,8 +7,20 @@
 
 # User-specific stuff:
 .idea/**/workspace.xml
-.idea/**/tasks.xml
+.iea/**/tasks.xmld
+.idea/workspace.xml
+.idea/tasks.xmld
 .idea/dictionaries
+.idea/.name
+.idea/misc.*
+
+attract.txt
+Xout1F.csv
+Xout2F.csv
+XqErrors2F.txt
+Xstat1F.*
+Xstat2F.*
+
 
 # Sensitive or high-churn files:
 .idea/**/dataSources/
