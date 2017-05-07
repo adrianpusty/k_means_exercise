@@ -106,7 +106,7 @@ public class DataSpace {
             this.centroids = forgyRandomCentroids(dataPoints, numberOfCentroids);
             setAffiliations();
         } else if (method == "RP") {
-            randomPartition(numberOfCentroids);
+            this.centroids = randomPartition(numberOfCentroids);
         }
     }
 
@@ -147,17 +147,20 @@ public class DataSpace {
      *
      * @param numberOfCentroids
      */
-    public void randomPartition(int numberOfCentroids) {
-        this.centroids = new ArrayList<>();
+    public List<Centroid> randomPartition(int numberOfCentroids) {
+        List<Centroid> initialCentroids = new ArrayList<Centroid>();
         for (int i = 0; i < numberOfCentroids; i++) {
+
             Centroid centroid = new Centroid();
             centroid.setPoints(new ArrayList<>());
-            this.centroids.add(centroid);
+            initialCentroids.add(centroid);
         }
         for (DataPoint dp : this.dataPoints) {
             int randomRow = ThreadLocalRandom.current().nextInt(0, (numberOfCentroids - 1));
-            this.centroids.get(randomRow).getPoints().add(dp);
+            initialCentroids.get(randomRow).getPoints().add(dp);
         }
+
+        return initialCentroids;
     }
 
     /**

@@ -16,6 +16,7 @@ import java.util.List;
  * @author Adrian
  */
 public class FileWrite {
+
     public void writeGroups(DataSpace dataSpace, String outputName) throws IOException {
         File fout = new File(outputName);
         FileOutputStream fos = new FileOutputStream(fout);
