@@ -7,7 +7,7 @@ import java.io.IOException;
  */
 public class App {
     public static void main(String[] args) throws IOException {
-        DataSpace dataSpace = new DataSpace("init.txt", 6, "RP");
+        DataSpace dataSpace = new DataSpace("init.txt", 30, "RP");
         dataSpace.kMeanProcess();
     }
 }

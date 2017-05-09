@@ -34,12 +34,12 @@ public class DataSpace {
 
         for (int i = 0; i < numberOfIterations; i++) {
             choseNewCentroids();
-            
+
             if (i == 0) {
                 fw.writeGroups(this, "Xout1" + this.method + ".csv");
                 fw.writeStats(this, "Xstat1" + this.method + ".txt");
             }
-            
+
             setAffiliations();
 
             quantError.add(countQuantization());
@@ -68,12 +68,12 @@ public class DataSpace {
 
         while (Math.abs(currentCountQuant - previouseCountQuant) > 0) {
             choseNewCentroids();
-            
+
             if (counter == 0) {
                 fw.writeGroups(this, "Xout1" + this.method + ".csv");
                 fw.writeStats(this, "Xstat1" + this.method + ".txt");
             }
-            
+
             setAffiliations();
 
             previouseCountQuant = currentCountQuant;
@@ -107,7 +107,7 @@ public class DataSpace {
             this.centroids = forgyRandomCentroids(dataPoints, numberOfCentroids);
             setAffiliations();
         } else if (method == "RP") {
-           randomPartition(numberOfCentroids);
+            randomPartition(numberOfCentroids);
         }
     }
 
@@ -224,17 +224,19 @@ public class DataSpace {
         for (Centroid c : centroids) {
             double sumX = 0.0, sumY = 0.0;
             int countXs = 0, countYs = 0;
+            if (c.getPoints().size() > 0) {
+                for (DataPoint dp : c.getPoints()) {
+                    sumX += dp.getX();
+                    sumY += dp.getY();
+                    countXs++;
+                    countYs++;
+                }
 
-            for (DataPoint dp : c.getPoints()) {
-                sumX += dp.getX();
-                sumY += dp.getY();
-                countXs++;
-                countYs++;
-            }
-            c.setX(sumX / countXs);
-            c.setY(sumY / countYs);
-            if(Double.isNaN(c.getX()) || Double.isNaN(c.getY())){
-                System.out.println(c.getX() + "   " + c.getY());
+                c.setX(sumX / countXs);
+                c.setY(sumY / countYs);
+                if (Double.isNaN(c.getX()) || Double.isNaN(c.getY())) {
+                    System.out.println(c.getX() + "   " + c.getY());
+                }
             }
         }
     }
@@ -259,6 +261,7 @@ public class DataSpace {
 //        }
 //        this.setGroups(groups);
 //    }
+
     /**
      * Dla wszystkich centroidow i nalezacych do nich punktow oblicza odleglosc
      * punktow od centroidu i oblicza srednia.
