@@ -5,6 +5,7 @@ import fileUtils.FileWrite;
 import model.Centroid;
 import model.DataPoint;
 
+import java.awt.geom.Arc2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +107,7 @@ public class DataSpace {
             this.centroids = forgyRandomCentroids(dataPoints, numberOfCentroids);
             setAffiliations();
         } else if (method == "RP") {
-            this.centroids = randomPartition(numberOfCentroids);
+           randomPartition(numberOfCentroids);
         }
     }
 
@@ -147,20 +148,18 @@ public class DataSpace {
      *
      * @param numberOfCentroids
      */
-    public List<Centroid> randomPartition(int numberOfCentroids) {
-        List<Centroid> initialCentroids = new ArrayList<Centroid>();
+    public void randomPartition(int numberOfCentroids) {
+        this.centroids = new ArrayList<Centroid>();
         for (int i = 0; i < numberOfCentroids; i++) {
 
             Centroid centroid = new Centroid();
             centroid.setPoints(new ArrayList<>());
-            initialCentroids.add(centroid);
+            this.centroids.add(centroid);
         }
         for (DataPoint dp : this.dataPoints) {
-            int randomRow = ThreadLocalRandom.current().nextInt(0, (numberOfCentroids - 1));
-            initialCentroids.get(randomRow).getPoints().add(dp);
+            int randomRow = ThreadLocalRandom.current().nextInt(0, (numberOfCentroids));
+            this.centroids.get(randomRow).getPoints().add(dp);
         }
-
-        return initialCentroids;
     }
 
     /**
@@ -234,6 +233,9 @@ public class DataSpace {
             }
             c.setX(sumX / countXs);
             c.setY(sumY / countYs);
+            if(Double.isNaN(c.getX()) || Double.isNaN(c.getY())){
+                System.out.println(c.getX() + "   " + c.getY());
+            }
         }
     }
 
